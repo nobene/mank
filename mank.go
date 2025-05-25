@@ -1,3 +1,4 @@
+// 2025 Copyright Mank developers, licensed under APACHE license.
 package main
 
 import (
@@ -138,7 +139,7 @@ func turn(y int) int {
 func compturn(x int) {
 	hand := n[x]
 	if hand == 0 {
-        decide()
+		decide()
 		return
 	}
 	n[x] = 0
@@ -252,7 +253,7 @@ outer:
 			case "Q":
 				return
 			case "S":
-                total = 0
+				total = 0
 				initGrid()
 				drawGrid()
 				moves = 0
