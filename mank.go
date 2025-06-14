@@ -16,10 +16,10 @@ const (
 	hard = 4
 )
 
-var n [14]int
+var n, k [14]int
 var d [14]string
 var total int
-var free int
+var free, fuse int
 
 func initGrid() {
 	rnd := 0
@@ -130,6 +130,7 @@ func turn(y int) int {
 		}
 	}
 	drawGrid()
+	who_won()
 	if y == 7 {
 		return 7
 	}
@@ -139,6 +140,7 @@ func turn(y int) int {
 func compturn(x int) {
 	hand := n[x]
 	if hand == 0 {
+		who_won()
 		decide()
 		return
 	}
@@ -154,6 +156,60 @@ func compturn(x int) {
 			break
 		}
 	}
+	if n[x] == 1 {
+		switch x {
+		case 1:
+			if n[13] == 0 {
+				break
+			}
+			n[0] += n[13]
+			n[0]++
+			n[1]--
+			n[13] = 0
+		case 2:
+			if n[12] == 0 {
+				break
+			}
+			n[0] += n[12]
+			n[0]++
+			n[2]--
+			n[12] = 0
+		case 3:
+			if n[11] == 0 {
+				break
+			}
+			n[0] += n[11]
+			n[0]++
+			n[3]--
+			n[11] = 0
+		case 4:
+			if n[10] == 0 {
+				break
+			}
+			n[0] += n[10]
+			n[0]++
+			n[4]--
+			n[10] = 0
+		case 5:
+			if n[9] == 0 {
+				break
+			}
+			n[0] += n[9]
+			n[0]++
+			n[5]--
+			n[9] = 0
+		case 6:
+			if n[8] == 0 {
+				break
+			}
+			n[0] += n[8]
+			n[0]++
+			n[6]--
+			n[8] = 0
+		default:
+			break
+		}
+	}
 	for z := range 14 {
 		d[z] = strconv.Itoa(n[z])
 		if n[z] == 0 {
@@ -161,6 +217,7 @@ func compturn(x int) {
 		}
 	}
 	drawGrid()
+	who_won()
 	if x == 0 {
 		decide()
 	}
@@ -168,15 +225,144 @@ func compturn(x int) {
 }
 
 func decide() {
+	who_won()
+    if fuse > 20 { return }
 	best := 1
-	best = rand.Intn(6) + 1
+	//	best = rand.Intn(6) + 1
+	best = can_steal()
+	if best == 0 {
+		best = rand.Intn(6) + 1
+//        fmt.Println(best)
+	}
 	if best > 6 {
 		best = 1
 	}
-	if best == 0 {
+	if best < 1 {
 		best = 6
 	}
+    fmt.Println("best was ", best)
 	compturn(best)
+    fuse++
+}
+
+func can_steal() int {
+	/*	for v := range 14 {
+		k[v] = n[v]
+	} */
+	for t := range 6 {
+		t++
+		//        fmt.Println(strconv.Itoa(t))
+		//       continue
+		for v := range 14 {
+			k[v] = n[v]
+		}
+		foot := k[t]
+		k[t] = 0
+		for {
+			t++
+			if t == 14 {
+				t = 0
+			}
+			k[t] += 1
+			foot--
+			if foot < 1 {
+				break
+			}
+		}
+		if k[t] == 1 {
+			switch t {
+			case 1:
+				if k[13] != 0 {
+					return 1
+				}
+				k[0] += k[13]
+				k[0]++
+				k[1]--
+				k[13] = 0
+			case 2:
+				if k[12] != 0 {
+					return 2
+				}
+				k[0] += k[12]
+				k[0]++
+				k[2]--
+				k[12] = 0
+			case 3:
+				if k[11] != 0 {
+					return 3
+				}
+				k[0] += k[11]
+				k[0]++
+				k[3]--
+				k[11] = 0
+			case 4:
+				if k[10] != 0 {
+					return 4
+				}
+				k[0] += k[10]
+				k[0]++
+				k[4]--
+				k[10] = 0
+			case 5:
+				if k[9] != 0 {
+					return 5
+				}
+				k[0] += k[9]
+				k[0]++
+				k[5]--
+				k[9] = 0
+			case 6:
+				if k[8] != 0 {
+					return 6
+				}
+				k[0] += k[8]
+				k[0]++
+				k[6]--
+				k[8] = 0
+			default:
+				return 0
+			}
+		}
+	}
+	//    return 0
+	//  os.Exit(0)
+	return 0
+}
+
+func who_won() {
+	var top, bottom int
+	top = n[1] + n[2] + n[3] + n[4] + n[5] + n[6]
+	bottom = n[8] + n[9] + n[10] + n[11] + n[12] + n[13]
+	if top != 0 {
+		if bottom != 0 {
+			return
+		}
+		n[7] += bottom
+		n[0] += top
+		gameover()
+		return
+	}
+	n[7] += bottom
+	n[0] = n[0] + top
+	gameover()
+	return
+}
+
+func gameover() {
+	fmt.Println("                            GAME OVER !!!  PC: " + strconv.Itoa(n[0]) + "    Human: " + strconv.Itoa(n[7]))
+    left := n[0]
+    right := n[7]
+    for b := range 14 {
+        n[b] = 0
+    }
+    n[0] = left
+    n[7] = right
+    for m := range 14 {
+        d[m] = strconv.Itoa(n[m])
+        if n[m] == 0 { d[m] = "" }
+    }
+    drawGrid()
+	os.Exit(0)
 }
 
 func main() {
@@ -257,6 +443,7 @@ outer:
 				initGrid()
 				drawGrid()
 				moves = 0
+                fuse = 0
 				continue outer
 			default:
 				fmt.Println("Invalid move, try again.")
