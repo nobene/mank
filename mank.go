@@ -19,7 +19,7 @@ const (
 var n, k [14]int
 var d [14]string
 var total int
-var free, fuse int
+var free, fuse, moves int
 
 func initGrid() {
 	rnd := 0
@@ -141,7 +141,7 @@ func compturn(x int) {
 	hand := n[x]
 	if hand == 0 {
 		who_won()
-		decide()
+		//		decide()
 		return
 	}
 	n[x] = 0
@@ -218,31 +218,41 @@ func compturn(x int) {
 	}
 	drawGrid()
 	who_won()
-	if x == 0 {
-		decide()
-	}
+	//	if x == 0 {
+	//		decide()
+	//	}
 	return
 }
 
 func decide() {
 	who_won()
-    if fuse > 20 { return }
+	if fuse > 995 {
+		return
+	}
 	best := 1
-	//	best = rand.Intn(6) + 1
 	best = can_steal()
 	if best == 0 {
 		best = rand.Intn(6) + 1
-//        fmt.Println(best)
+		//		fmt.Println(best)
+		//		return
 	}
-	if best > 6 {
-		best = 1
+	//	if n[best] != 0 {
+	//		compturn(best)
+	//	    fmt.Println("best was ", best)
+	//	    fuse++
+	//	    fmt.Println("decide() exited...")
+	//        return
+	//    }
+	for {
+		best = rand.Intn(6) + 1
+		if n[best] != 0 {
+			compturn(best)
+			fmt.Println("best was ", best)
+			fuse++
+			fmt.Println("decide() exited...")
+			return
+		}
 	}
-	if best < 1 {
-		best = 6
-	}
-    fmt.Println("best was ", best)
-	compturn(best)
-    fuse++
 }
 
 func can_steal() int {
@@ -349,19 +359,21 @@ func who_won() {
 }
 
 func gameover() {
-	fmt.Println("                            GAME OVER !!!  PC: " + strconv.Itoa(n[0]) + "    Human: " + strconv.Itoa(n[7]))
-    left := n[0]
-    right := n[7]
-    for b := range 14 {
-        n[b] = 0
-    }
-    n[0] = left
-    n[7] = right
-    for m := range 14 {
-        d[m] = strconv.Itoa(n[m])
-        if n[m] == 0 { d[m] = "" }
-    }
-    drawGrid()
+	fmt.Println("                    In " + strconv.Itoa(moves) + " moves: GAME OVER !!!  PC: " + strconv.Itoa(n[0]) + "    Human: " + strconv.Itoa(n[7]))
+	left := n[0]
+	right := n[7]
+	for b := range 14 {
+		n[b] = 0
+	}
+	n[0] = left
+	n[7] = right
+	for m := range 14 {
+		d[m] = strconv.Itoa(n[m])
+		if n[m] == 0 {
+			d[m] = ""
+		}
+	}
+	drawGrid()
 	os.Exit(0)
 }
 
@@ -371,7 +383,7 @@ func main() {
 	drawGrid()
 	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("When entering moves, you can also enter Q to quit or S to start again.")
-	moves := 0
+	// moves := 0
 outer:
 	for {
 		//		drawGrid()
@@ -443,11 +455,145 @@ outer:
 				initGrid()
 				drawGrid()
 				moves = 0
-                fuse = 0
+				fuse = 0
 				continue outer
+			case "T":
+				autoplay()
+				os.Exit(0)
 			default:
 				fmt.Println("Invalid move, try again.")
 			}
 		}
 	}
+}
+
+func autoplay() {
+	for {
+		fmt.Println("calling fakehuman()...")
+		fakehuman()
+		moves++
+		fmt.Println("calling decide()...")
+		decide()
+		moves++
+		fmt.Println("calling who_won()...")
+		who_won()
+	}
+}
+
+func fakehuman() {
+	who_won()
+	if fuse > 5 {
+		return
+	}
+	best := 1
+	//	best = rand.Intn(6) + 1
+	best = can_steal()
+	if best == 0 {
+		best = rand.Intn(6) + 8
+		//        fmt.Println(best)
+	}
+	if best > 13 {
+		best = 8
+	}
+	if best < 8 {
+		best = 13
+	}
+	fmt.Println("best was ", best)
+	for {
+		zero := autoturn(best)
+		if zero != 0 {
+			break
+		}
+	}
+	fuse++
+	fmt.Println("fakehuman() exited...")
+	who_won()
+	return
+}
+
+func autoturn(y int) int {
+	hand := n[y]
+	if hand == 0 {
+		//		fmt.Println("No stones here, choose another pit (")
+		return 1
+	}
+	n[y] = 0
+	for {
+		y++
+		if y == 14 {
+			y = 0
+		}
+		n[y] += 1
+		hand--
+		if hand < 1 {
+			break
+		}
+	}
+	if n[y] == 1 {
+		switch y {
+		case 13:
+			if n[1] == 0 {
+				break
+			}
+			n[7] += n[1]
+			n[7]++
+			n[13]--
+			n[1] = 0
+		case 12:
+			if n[2] == 0 {
+				break
+			}
+			n[7] += n[2]
+			n[7]++
+			n[12]--
+			n[2] = 0
+		case 11:
+			if n[3] == 0 {
+				break
+			}
+			n[7] += n[3]
+			n[7]++
+			n[11]--
+			n[3] = 0
+		case 10:
+			if n[4] == 0 {
+				break
+			}
+			n[7] += n[4]
+			n[7]++
+			n[10]--
+			n[4] = 0
+		case 9:
+			if n[5] == 0 {
+				break
+			}
+			n[7] += n[5]
+			n[7]++
+			n[9]--
+			n[5] = 0
+		case 8:
+			if n[6] == 0 {
+				break
+			}
+			n[7] += n[6]
+			n[7]++
+			n[8]--
+			n[6] = 0
+		default:
+			break
+		}
+	}
+	for z := range 14 {
+		d[z] = strconv.Itoa(n[z])
+		if n[z] == 0 {
+			d[z] = ""
+		}
+	}
+	drawGrid()
+	who_won()
+	fmt.Println("autoturn() exited...")
+	if y == 7 {
+		return 7
+	}
+	return 0
 }
