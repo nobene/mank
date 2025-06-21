@@ -18,8 +18,8 @@ const (
 
 var n, k [14]int
 var d [14]string
-var r [1010]string
-var pc, hum [1010]int
+var r [5010]string
+var pc, hum [5010]int
 var total, over int
 var free, fuse, moves int
 var result string
@@ -378,7 +378,7 @@ func gameover() {
 	drawGrid()
     over = 1
     return
-	// os.Exit(0)
+//	 os.Exit(0)
 }
 
 func main() {
@@ -456,7 +456,8 @@ outer:
 				return
 			case "R":
 				run()
-				os.Exit(0)
+//				os.Exit(0)
+                continue outer
 			case "S":
 				total = 0
                 over = 0
@@ -467,7 +468,14 @@ outer:
 				continue outer
 			case "T":
 				autoplay()
-				os.Exit(0)
+                total = 0
+                over = 0
+                initGrid()
+                drawGrid()
+                moves = 0
+                fuse = 0
+                continue outer
+//				os.Exit(0)
 			default:
 				fmt.Println("Invalid move, try again.")
 			}
@@ -613,17 +621,19 @@ func autoturn(y int) int {
 func run() {
     initGrid()
     drawGrid()
-	for q := 1; q < 1000; q++ {
+	for q := 1; q < 5000; q++ {
 		autoplay()
 		pc[q] = n[0]
 		hum[q] = n[7]
 		r[q] = result
-        over = 1
+//        print_stats()
+//        os.Exit(0)
+        over = 0
         total = 0
         initGrid()
         drawGrid()
         moves = 0
-        total = 0
+        fuse = 0
 	}
 	print_stats()
 	return
@@ -644,5 +654,5 @@ func print_stats() {
 			losses++
 		}
 	}
-	fmt.Println("Human won: " + strconv.Itoa(wins) + " PC won: " + strconv.Itoa(losses) + " Draws: " + strconv.Itoa(draws))
+	fmt.Println("Human won: " + strconv.Itoa(wins) + " |  PC won: " + strconv.Itoa(losses) + " |  Draws: " + strconv.Itoa(draws))
 }
