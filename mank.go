@@ -18,8 +18,11 @@ const (
 
 var n, k [14]int
 var d [14]string
-var total int
+var r [1010]string
+var pc, hum [1010]int
+var total, over int
 var free, fuse, moves int
+var result string
 
 func initGrid() {
 	rnd := 0
@@ -236,13 +239,6 @@ func decide() {
 		//		fmt.Println(best)
 		//		return
 	}
-	//	if n[best] != 0 {
-	//		compturn(best)
-	//	    fmt.Println("best was ", best)
-	//	    fuse++
-	//	    fmt.Println("decide() exited...")
-	//        return
-	//    }
 	for {
 		best = rand.Intn(6) + 1
 		if n[best] != 0 {
@@ -256,9 +252,6 @@ func decide() {
 }
 
 func can_steal() int {
-	/*	for v := range 14 {
-		k[v] = n[v]
-	} */
 	for t := range 6 {
 		t++
 		//        fmt.Println(strconv.Itoa(t))
@@ -367,6 +360,15 @@ func gameover() {
 	}
 	n[0] = left
 	n[7] = right
+	if left == right {
+		result = "DRAW"
+	}
+	if left < right {
+		result = "HUMAN WON"
+	}
+	if left > right {
+		result = "PC WON"
+	}
 	for m := range 14 {
 		d[m] = strconv.Itoa(n[m])
 		if n[m] == 0 {
@@ -374,7 +376,9 @@ func gameover() {
 		}
 	}
 	drawGrid()
-	os.Exit(0)
+    over = 1
+    return
+	// os.Exit(0)
 }
 
 func main() {
@@ -450,8 +454,12 @@ outer:
 				continue outer
 			case "Q":
 				return
+			case "R":
+				run()
+				os.Exit(0)
 			case "S":
 				total = 0
+                over = 0
 				initGrid()
 				drawGrid()
 				moves = 0
@@ -477,7 +485,11 @@ func autoplay() {
 		moves++
 		fmt.Println("calling who_won()...")
 		who_won()
+        if over == 1 { break }
 	}
+	fmt.Println("     ------------- Game over ----------------")
+	fmt.Println()
+	return
 }
 
 func fakehuman() {
@@ -596,4 +608,41 @@ func autoturn(y int) int {
 		return 7
 	}
 	return 0
+}
+
+func run() {
+    initGrid()
+    drawGrid()
+	for q := 1; q < 1000; q++ {
+		autoplay()
+		pc[q] = n[0]
+		hum[q] = n[7]
+		r[q] = result
+        over = 1
+        total = 0
+        initGrid()
+        drawGrid()
+        moves = 0
+        total = 0
+	}
+	print_stats()
+	return
+}
+
+func print_stats() {
+	fmt.Println("          ===================================================================")
+	fmt.Println()
+	var wins, losses, draws int
+	for g := range r {
+		if r[g] == "DRAW" {
+			draws++
+		}
+		if r[g] == "HUMAN WON" {
+			wins++
+		}
+		if r[g] == "PC WON" {
+			losses++
+		}
+	}
+	fmt.Println("Human won: " + strconv.Itoa(wins) + " PC won: " + strconv.Itoa(losses) + " Draws: " + strconv.Itoa(draws))
 }
